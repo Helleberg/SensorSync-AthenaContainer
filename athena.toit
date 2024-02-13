@@ -3,8 +3,10 @@ import uuid
 import system.storage
 import encoding.json
 
-HOST ::= ""                   // Brokers ip address
-PORT ::= 1883                 // Brokers port
+HOST ::= ""                   // Broker ip address
+PORT ::= 1883                 // Broker port
+USERNAME ::= ""               // Broker auth username
+PASSWORD ::= ""               // Broker auth password
 TOPIC ::= "lifecycle/status"  // Publish topic
 
 main:
@@ -34,8 +36,8 @@ lifecycle:
   // mqtt session settings for client acknowledge and authentication
   options := mqtt.SessionOptions
       --client-id = client-id
-      --username  = ""   // Broker auth username
-      --password  = ""   // Broker auth password
+      --username  = USERNAME
+      --password  = PASSWORD
 
   // Start client with session settings
   client.start --options=options
