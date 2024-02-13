@@ -2,6 +2,11 @@
 
 Athena container are the devices code that runs on an esp32 with Toit firmware. Athena is a Fleet Management system developed as an bachelor project. When this code is installed as an container on an esp32 microcontroller with Toit firmware, will it be possible to monitor the device status and make OTA updates to it.
 
+## Prerequisites
+
+1. Have an esp32 ready with the [Toit Jaguar firmware](https://github.com/toitlang/jaguar) flashed on to it.
+2. When the esp32 has the Toit Jaguar firmware and are configured to your Wi-Fi, are you ready to move on.
+
 ## Usage
 
 Define the host connection, all of the values should be change according to your MQTT broker setup:
@@ -23,6 +28,11 @@ Define the publish topic - "TOPIC" is the topic that the payload will be publish
 ```toit
 // "TOPIC" is the MQTT topic that the device should publish to.
 TOPIC ::= "lifecycle/status"
+```
+
+Install the Athena container on your esp32:
+```jag
+jag container install Athena athena.toit
 ```
 
 ## Disclaimer
