@@ -5,7 +5,7 @@ Athena container are the devices code that runs on an esp32 with Toit firmware. 
 ## Usage
 
 Define the host connection, all of the values should be change according to your MQTT broker setup:
-'''toit
+```toit
 // "HOST" is the ip address of the MQTT broker.
 HOST ::= "127.0.0.1"
 
@@ -17,13 +17,13 @@ USERNAME ::= "admin"
 
 // "PASSWORD" is the password for authentication with the MQTT broker.
 PASSWORD ::= "admin"
-'''
+```
 
 Define the publish topic - "TOPIC" is the topic that the payload will be published to.
-'''toit
+```toit
 // "TOPIC" is the MQTT topic that the device should publish to.
 TOPIC ::= "lifecycle/status"
-'''
+```
 
 ## Disclaimer
 
