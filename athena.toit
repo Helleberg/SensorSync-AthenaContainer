@@ -1,58 +1,59 @@
 import mqtt
 import uuid
 import system.storage
+import device
+import system.firmware
 import encoding.json
 
-HOST ::= ""                   // Broker ip address
-PORT ::= 1883                 // Broker port
-USERNAME ::= ""               // Broker auth username
-PASSWORD ::= ""               // Broker auth password
-TOPIC ::= "lifecycle/status"  // Publish topic
+HOST ::= "192.168.137.41"                   // Broker ip address
+PORT ::= 1883                               // Broker port
+USERNAME ::= "admin"                        // Broker auth username
+PASSWORD ::= "password"                     // Broker auth password
 
 main:
-  task:: lifecycle
-
-store-uuid:
-  // Open esp system stroage bucket called "athena-bucket"
-  // Bucket docs: https://libs.toit.io/system/storage/class-Bucket
-  bucket := storage.Bucket.open --ram "athena-bucket"
-
-  // Check if an client uuid already exists in the Athena stroage bucket.
-  // If not create a one and store it.
-  bucket.get "uuid" --if-absent=: bucket["uuid"] = (uuid.uuid5 "Athena" "$Time.now.local").to-string
-
-  // Return the stored uuid
-  return bucket["uuid"]
-
-lifecycle:
-  // Get stored uuid
-  client-id := store-uuid
-
-  print "[Athena] INFO: retrived client-id: $client-id"
-
+  
   // Initiate client for mqtt connection
   client := mqtt.Client --host=HOST --port=PORT
 
   // mqtt session settings for client acknowledge and authentication
   options := mqtt.SessionOptions
-      --client-id = client-id
+      --client-id = device.hardware-id.to-string
       --username  = USERNAME
       --password  = PASSWORD
 
   // Start client with session settings
   client.start --options=options
 
-  print "[Athena] INFO: connected to broker"
+  print "[Athena] INFO: Connected to MQTT broker"
+
+  task:: lifecycle client
+
+init client/mqtt.Client:
+  print "[Athena] INFO: Initializing device"
+
+  // Create new device payload
+  new_device := json.encode {
+    "device_id": "$device.hardware-id",
+    "firmware_version": "$firmware.uri"
+  }
+
+  // Publish the payload to the broker with specified topic
+  client.publish "device/new" new_device --qos=1 --retain=true
+
+lifecycle client/mqtt.Client:
+  init client
 
   // Lifecycle loop
   while true:
     // Create status lifecycle payload
-    payload := json.encode {
+    status := json.encode {
       "value": "ESP with Toit firmware running Athena container",
-      "client-id": client-id,
-      "now": Time.now.utc.to-iso8601-string
+      "device-id": "$device.hardware-id",
+      "firmware": "$firmware.uri",
+      "now": "$Time.now.ms-since-epoch"
     }
 
     // Publish the payload to the broker with specified topic
-    client.publish TOPIC payload
-    sleep --ms=1_000
+    client.publish "lifecycle/status" status
+    sleep --ms=1000
+  
